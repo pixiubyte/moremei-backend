@@ -1,0 +1,94 @@
+syntax = "v1"
+
+@server(
+    group: auth
+    prefix: auth
+)
+service tenant-api {
+    @doc(
+        summary: "登录"
+    )
+    @handler LoginHandler
+    post /login (LoginRequest) returns (LoginResponse)
+
+    @doc(
+        summary:"微信授权码登录"
+    )
+    @handler WechatLoginHandler
+    post /wechat (WechatLoginRequest) returns (LoginResponse)
+
+    @doc "小程序登录"
+    @handler MiniLoginHandler
+    post /mini (MiniLoginRequest) returns (LoginResponse)
+
+    @doc "小程序注册登录"
+    @handler MiniRegisterHandler
+    post /mini/register (MiniRegisterRequest) returns (LoginResponse)
+
+    @doc "第三方登录"
+    @handler ThirdLoginHandler
+    post /login/:auth_provider (ThirdLoginRequest) returns (LoginResponse)
+}
+
+@server(
+    group: auth
+    prefix: auth
+    middleware: TokenAuthMiddleware
+)
+service tenant-api {
+    @doc "获取token"
+    @handler GetTokenHandler
+    post /token (GetTokenRequest) returns (GetTokenResponse)
+}
+
+type (
+    LoginRequest {
+        Mobile string `json:"mobile" validate:"mobile"`
+        Code string `json:"code"`
+    }
+    LoginResponse {
+        AccessToken string `json:"access_token"`
+        ExpiresIn int64 `json:"expires_in"`
+        UserId string `json:"user_id"`
+        Nickname string `json:"nickname"`
+        Avatar string `json:"avatar"`
+    }
+
+    WechatLoginRequest {
+        Code string `json:"code"`
+    }
+
+    GetTokenRequest {
+        NickName string `json:"nickname"`
+        AvatarUrl string `json:"avatar"`
+        Gender int64 `json:"gender"`
+        Mobile string `json:"mobile"`
+    }
+
+    GetTokenResponse {
+        AccessToken string `json:"access_token"`
+        ExpiresIn int64 `json:"expires_in"`
+        UserId string `json:"user_id"`
+        Nickname string `json:"nickname"`
+        Avatar string `json:"avatar"`
+    }
+
+    MiniLoginRequest {
+        JsCode string `json:"js_code"`
+    }
+
+    MiniRegisterRequest {
+        JsCode string `json:"js_code"`
+        MobileCode string `json:"mobile_code,optional"`
+        Mobile string `json:"mobile" validate:"mobile"`
+        Code string `json:"code"`
+        Invite string `json:"invite,optional"`
+    }
+
+    ThirdLoginRequest {
+        AuthProvider string `path:"auth_provider"`
+        Code string `json:"code"`
+        App string `json:"app,optional"`    // 应用, 用于区分不同的应用,
+        Platform string `json:"platform,optional"`  // 平台, Android apple web wechat_mini
+    }
+)

@@ -1,0 +1,315 @@
+syntax = "v1"
+
+
+@server(
+    jwt: Auth
+    group: chat
+    prefix: chat
+)
+service tenant-api {
+    @doc "获取AI机器人详情"
+    @handler GetAiRobotHandler
+    get /airobot/:rid (GetAiRobotRequest) returns (AiRobot)
+
+    @doc(
+        summary: "获取会话列表"
+    )
+    @handler GetConversationsHandler
+    get /conversations returns (GetConversationsResponse)
+    @doc(
+        summary: "添加会话"
+    )
+    @handler AddConversationHandler
+    post /conversation (AddConversationRequest) returns (Conversation)
+    @doc(
+        summary: "获取会话消息列表"
+    )
+    @handler GetConversationMessagesHandler
+    get /conversation/messages (GetConversationMessagesRequest) returns (GetConversationMessagesResponse)
+    @doc(
+        summary: "会话消息赞踩"
+    )
+    @handler OpinionConversationMessageHandler
+    post /conversation/message/:message_id/opinion (OpinionConversationMessageRequest)
+
+    @doc(
+        summary: "文字转语音"
+    )
+    @handler TextToSpeechHandler
+    post /conversation/message/text-to-audio (TextToSpeechRequest)
+
+    @doc(
+        summary: "文字消息转语音"
+    )
+    @handler MessageToSpeechHandler
+    post /conversation/message/:message_id/audio (MessageToSpeechRequest)
+
+    @doc "修改答案"
+    @handler EditAnswerMessageHandler
+    post /conversation/message/edit (EditAnswerMessageRequest)
+
+    @doc "机器人id获取会话消息列表"
+    @handler SendRobotMessageHandler
+    post /robot/message (SendRobotMessageRequest) returns (RobotIdChatHistory)
+
+    @doc "机器人聊天记录"
+    @handler GetRobotChatHistoryHandler
+    get /history/:id (GetRobotChatHistoryRequest) returns (GetRobotChatHistoryResponse)
+
+    @doc "机器人聊天sse"
+    @handler SendRobotMessageSseHandler
+    post /robot/message/sse (SendRobotMessageRequest) returns (RobotIdChatHistory)
+
+    @doc "分享聊天记录"
+    @handler ShareRobotChatHistoryHandler
+    post /robot/share/:id (ShareRobotChatHistoryRequest) returns (ShareRobotChatHistoryResponse)
+
+    @doc "获取分享聊天记录"
+    @handler GetShareRobotChatHistoryHandler
+    get /robot/share/:id (GetShareRobotChatHistoryRequest) returns (GetShareRobotChatHistoryResponse)
+
+    @doc "获取机器人对话开场白"
+    @handler GetRobotOpeningStatementHandler
+    get /robot/:robot_id/opening-statement (GetRobotOpeningStatementRequest) returns (GetRobotOpeningStatementResponse)
+
+    @doc "获取下一轮推荐问题"
+    @handler GetRobotNextSuggestedHandler
+    get /robot/message/:message_id/suggested (GetRobotNextSuggestedRequest) returns (GetRobotNextSuggestedResponse)
+
+    @doc "文件检测"
+    @handler FileDetectHandler
+    post /file/detect (FileDetectRequest) returns (FileDetectResponse)
+
+    @doc "机器人聊天记录"
+    @handler GetRobotChatMessages
+    get /robot/:id/messages (GetRobotChatMessagesRequest) returns (GetRobotChatMessagesResponse)
+
+}
+
+@server(
+    group: chat
+    prefix: chat
+    middleware: TokenCheckMiddleware
+)
+service tenant-api {
+    @doc(
+        summary: "获取AI机器人列表"
+    )
+    @handler GetAiRobotsHandler
+    get /airobots(GetAiRobotsRequest) returns (GetAiRobotsResponse)
+}
+
+type (
+    GetAiRobotsRequest {
+        Scene string `form:"scene,optional"`
+    }
+    AiRobot {
+        Id string `json:"id"`
+        Name string `json:"name"`
+        Desc string `json:"desc"`
+        Category string `json:"category"`
+        IsDefault bool `json:"is_default"`
+        Avator string `json:"avator"`
+    }
+    GetAiRobotsResponse {
+        List []*AiRobot `json:"list"`
+    }
+    GetAiRobotRequest {
+        RobotId string `path:"rid"`
+    }
+    Conversation {
+        Id string `json:"id"`
+        CreatedTime int64 `json:"created_time"`
+        AiRobot AiRobot `json:"ai_robot"`
+    }
+    GetConversationsResponse {
+        List []*Conversation `json:"list"`
+    }
+    AddConversationRequest {
+        AiRobotId string `json:"ai_robot_id"`
+    }
+    Message {
+        Id string `json:"id"`
+        ConversationId string `json:"conversation_id"`
+        ParentId string `json:"parent_id"`
+        ParentContent string `json:"parent_content"`
+        AuthorType string `json:"author_type"`
+        Content string `json:"content"`
+        Type int64 `json:"type"`
+        Source int64 `json:"source"`
+        Opinion int64 `json:"opinion"`
+        CreatedTime int64 `json:"created_time"`
+        BestAnswer NewAnswer `json:"best_answer"`
+    }
+    GetConversationMessagesRequest {
+        ConversationId string `form:"conversation_id"`
+        LatestNode string `form:"latest_node,optional"`
+        PageSize int `form:"page_size,optional,default=20,range=(0:20]"`
+    }
+    GetConversationMessagesResponse {
+        CurrentNode string `json:"current_node"`
+        Messages []*Message `json:"messages"`
+    }
+    OpinionConversationMessageRequest {
+        MessageId string `path:"message_id"`
+        Action string `json:"action,options=thumbsup|thumbsdown|cancel"`
+    }
+    EditAnswerMessageRequest {
+        Id string `json:"id"`
+        Content string `json:"content" validate:"required,max=4096"`
+    }
+    NewAnswer {
+        Content string `json:"content"`
+        CreatedTime int64 `json:"created_time"`
+    }
+
+    SendRobotMessageRequest {
+        AiRobotId string `json:"ai_robot_id"`
+        MsgType int64 `json:"msg_type"`
+        Content string `json:"content"`
+        ContentType int64 `json:"content_type,default=1"` // 消息类型, 默认消息类型1
+        Inputs map[string]interface{} `json:"inputs,optional"` // 输入参数
+    }
+
+    GetRobotChatHistoryRequest {
+        AiRobotId string `path:"id"`
+        MsgType int64 `form:"msg_type"`
+        LatestNode string `form:"latest_node,optional"`
+        PageSize int `form:"page_size,optional,default=20,range=(0:20]"`
+    }
+
+    GetRobotChatHistoryResponse {
+        CurrentNode string `json:"current_node"`
+        Messages []*RobotIdChatHistory `json:"messages"`
+    }
+
+    RobotIdChatHistory {
+        Id string `json:"id"`
+        AiRobotId string `json:"ai_robot_id"`
+        ParentId string `json:"parent_id"`
+        ParentContent string `json:"parent_content"`
+        ParentCreatedTime int64 `json:"parent_created_time"`
+        AuthorType string `json:"author_type"`
+        Content string `json:"content"`
+        Type int64 `json:"type"`
+        CreatedTime int64 `json:"created_time"`
+        Opinion int64 `json:"opinion"`
+        BestAnswer NewAnswer `json:"best_answer"`
+    }
+
+    RobotIdChatMessage {
+        Content string `json:"content"`
+        CreatedTime int64 `json:"created_time"`
+    }
+
+    TextToSpeechRequest {
+        AiRobotId string `json:"ai_robot_id,optional"`
+        MessageId string `json:"message_id,optional"`
+        Text string `json:"text,optional"` // 语音文本,如果没有传 message-id的话，则会使用这个字段的内容
+        Stream bool `json:"stream,optional,default=false"`
+    }
+
+    MessageToSpeechRequest {
+        MessageId string `path:"message_id"`
+        Stream bool `json:"stream,optional,default=false"`
+    }
+
+    ShareRobotChatHistoryRequest {
+        Id string `path:"id"`                           // 机器人ID
+        Messages []ChatHistoryMessage `json:"messages"` // 聊天记录列表
+    }
+
+    ShareRobotChatHistoryResponse {
+        ShareId string `json:"share_id"` // 分享ID
+    }
+
+    GetShareRobotChatHistoryRequest {
+        Id string `path:"id"` // 分享ID
+    }
+
+    GetShareRobotChatHistoryResponse {
+        Messages []ChatHistoryMessageResponse `json:"messages"` // 聊天记录列表
+        ShareInfo ShareInfo `json:"share_info"`                 // 分享信息
+    }
+
+    ShareInfo {
+        CreatedAt int64 `json:"created_at"`    // 分享时间
+        SharerName string `json:"sharer_name"` // 分享者名称
+        SharerId string `json:"sharer_id"`     // 分享者ID
+    }
+
+    ChatHistoryMessage {
+        Role string `json:"role"`                                       // 角色类型 (user/ai)
+        Name string `json:"name,optional"`                              // 用户名称
+        UUID string `json:"uuid,optional"`                              // 用户ID
+        Avatar string `json:"avatar,optional"`                          // 用户头像
+        Content string `json:"content"`                                 // 聊天内容
+        ContentType int64 `json:"content_type,default=1"`                // 消息类型, 默认消息类型1
+        CreatedAt int64 `json:"created_at"`                             // 消息创建时间
+    }
+
+    ChatHistoryMessageResponse {
+        Role string `json:"role"`                                       // 角色类型 (user/ai)
+        Name string `json:"name"`                                       // 用户名称
+        Avatar string `json:"avatar"`                                   // 用户头像
+        Content string `json:"content"`                                 // 聊天内容
+        ContentType int64 `json:"content_type,default=1"`                // 消息类型, 默认消息类型1
+        CreatedAt int64 `json:"created_at"`                             // 消息创建时间
+    }
+
+    GetRobotOpeningStatementRequest {
+        RobotId string `path:"robot_id"` // 机器人ID
+    }
+
+    GetRobotOpeningStatementResponse {
+        OpeningStatement string `json:"opening_statement"` // 开场白
+        Suggested []string `json:"suggested"` // 推荐问题列表
+    }
+
+    GetRobotNextSuggestedRequest {
+        MessageId string `path:"message_id"` // 消息ID
+        RawMsgId string `form:"raw-msg-id,optional"` // 原始消息ID
+    }
+
+    GetRobotNextSuggestedResponse {
+        Suggested []string `json:"suggested"` // 推荐问题列表
+    }
+
+    FileDetectRequest {
+        Url string `json:"url"` // 文件URL
+        Type string `json:"type,options=image|document"` // 文件类型
+    }
+
+    FileDetectResponse {
+        Result bool `json:"result"` // 是否通过
+        Msg string `json:"msg"` // 提示信息
+        Category string `json:"category"` // 分类
+        Questions []string `json:"questions"` // 问题列表
+    }
+
+    GetRobotChatMessagesRequest {
+        AiRobotId string `path:"id"`
+        MsgType int64 `form:"msg_type"`
+        LatestNode string `form:"latest_node,optional"`
+        PageSize int `form:"page_size,optional,default=20,range=(0:20]"`
+    }
+
+    ChatMessage {
+        Id string `json:"id"`
+        AiRobotId string `json:"ai_robot_id"`
+        ParentId string `json:"parent_id"`
+        ParentContent string `json:"parent_content"`
+        ParentCreatedTime int64 `json:"parent_created_time"`
+        AuthorType string `json:"author_type"`
+        Content string `json:"content"`
+        Type int64 `json:"type"`
+        CreatedTime int64 `json:"created_time"`
+        Opinion int64 `json:"opinion"`
+        BestAnswer NewAnswer `json:"best_answer"`
+    }
+
+    GetRobotChatMessagesResponse {
+        CurrentNode string `json:"current_node"`
+        Messages []*ChatMessage `json:"messages"`
+    }
+)

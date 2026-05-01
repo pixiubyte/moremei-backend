@@ -1,0 +1,17 @@
+-- Active: 1717141082295@@192.168.1.27@3306@moremei-ai-saas-tenant-01
+CREATE TABLE article(
+    id BIGINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT 'Primary Key',
+    user_id BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '用户id',
+    title VARCHAR(256) NOT NULL COMMENT '标题',
+    author VARCHAR(128) COMMENT '作者',
+    abstract VARCHAR(256) COMMENT '摘要',
+    cover VARCHAR(1024) COMMENT '封面',
+    content JSON NOT NULL COMMENT '文章内容',
+    tags JSON COMMENT '标签',
+    questions JSON COMMENT '问题',
+    source VARCHAR(1024) COMMENT '来源',
+    source_time DATETIME COMMENT '原文发布时间',
+    is_public TINYINT NOT NULL DEFAULT 0 COMMENT '是否公开',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) COMMENT '文章';

@@ -1,0 +1,78 @@
+package errs
+
+import errorx "moremei/ai-saas/pkg/x/error"
+
+var (
+	TenantNotFound            = errorx.NewError(2000, "租户不存在")
+	UserNotRegisterError      = errorx.NewError(2001, "用户未注册")
+	UserUnbindMobileError     = errorx.NewError(2002, "用户未绑定手机号")
+	UserBindExistMobileError  = errorx.NewError(2003, "该手机号已被其它账号绑定")
+	SmsSendRepeatError        = errorx.NewError(2010, "验证码发送频繁")
+	SmsSendToManyTimesError   = errorx.NewError(2011, "今日验证码发送已超上限，请明天再来")
+	SmsCodeError              = errorx.NewError(2012, "验证码错误")
+	SmsCaptchaError           = errorx.NewError(2013, "验证失败")
+	AiRobotNotFoundError      = errorx.NewError(2020, "AI选择有误")
+	ConversationNotFoundError = errorx.NewError(2021, "会话不存在")
+	MessageNotFoundError      = errorx.NewError(2022, "消息不存在")
+	MessageHasOpinion         = errorx.NewError(2023, "您已对此条消息进行了评价")
+	CosFileDoesNotExistError  = errorx.NewError(2030, "文件不存在")
+	CosFileForbiddenError     = errorx.NewError(2031, "无权访问该文件")
+	CosFileCategoryError      = errorx.NewError(2032, "业务类型有误")
+	QrcodeNotFoundError       = errorx.NewError(2040, "二维码不存在")
+	ParamsError               = errorx.NewError(2050, "固定参数错误")
+	CategoryError             = errorx.NewError(2051, "类型不存在")
+	UserNameLongError         = errorx.NewError(2052, "用户名过长")
+	AddressLongError          = errorx.NewError(2053, "权益地址超过255字")
+	BirthDayError             = errorx.NewError(2053, "出生日期格式错误")
+	UserError                 = errorx.NewError(2054, "暂无权限")
+	MiniBindError             = errorx.NewError(2055, "手机号已绑定其他微信")
+	ProductNotFoundError      = errorx.NewError(2056, "产品不存在")
+
+	AppointmentDuplicateError = errorx.NewError(3000, "请勿重复预约")
+	SkinTestNotFoundError     = errorx.NewError(3010, "测肤记录不存在")
+
+	TBTTokenError = errorx.NewError(4000, "token不正确")
+	TBTUserError  = errorx.NewError(4001, "用户不存在")
+
+	RmyMobileNoSameError = errorx.NewError(5000, "手机号与原始手机号不同")
+	RmyMobileExistError  = errorx.NewError(5001, "手机号已被占用")
+	RmyNotMobileError    = errorx.NewError(5002, "手机号不正确")
+	RmyUserNoExistError  = errorx.NewError(5003, "用户不存在")
+
+	RecordLimit = errorx.NewError(6000, "额度不足，请到小程序购买后再试")
+
+	UserUnBuy = errorx.NewError(7000, "暂无权限")
+
+	UserUnQaAnnotation = errorx.NewError(8000, "无修改答案权限")
+	AuthTimeout        = errorx.NewError(8100, "认证超时，请重新授权")
+
+	ErrHabitNotFound    = errorx.NewError(9001, "习惯不存在")
+	ErrNoPermission     = errorx.NewError(9002, "无权操作")
+	ErrNotCheckInTime   = errorx.NewError(9003, "不在打卡时间范围内")
+	ErrAlreadyCheckedIn = errorx.NewError(9004, "今日已打卡")
+	ErrNotCheckInDay    = errorx.NewError(9005, "今天不是打卡日")
+	ErrNotCheckInImage  = errorx.NewError(9006, "请上传打卡图片")
+	ErrDefaultHabit     = errorx.NewError(9007, "默认打卡项无法删除")
+
+	ErrDailyAnswerLimit = errorx.NewError(400, "已达到今日答题上限")
+
+	ErrJoinGroupAlready                = errorx.NewError(10001, "您已经申请过加入该群")
+	ErrUserAlreadyInGroup              = errorx.NewError(10002, "您已经是该群成员")
+	ErrGroupNotAvailable               = errorx.NewError(10003, "该群暂时不可用")
+	ErrInviteCodeNotFound              = errorx.NewError(10004, "邀请码不存在或已过期")
+	ErrGroupNotFound                   = errorx.NewError(10005, "群组不存在")
+	ErrGroupNotMatch                   = errorx.NewError(10006, "邀请码与群不匹配")
+	ErrUserNotFound                    = errorx.NewError(10007, "用户不存在")
+	ErrJoinApplyNotFound               = errorx.NewError(10008, "加入申请不存在")
+	ErrInviteCodeExpired               = errorx.NewError(10009, "邀请码已过期")
+	ErrNotInGroup                      = errorx.NewError(10010, "您不在该群组中")
+	ErrTargetUserNotInGroup            = errorx.NewError(10011, "目标用户不在该群组中")
+	ErrGetTargetUserGroupSettingFailed = errorx.NewError(10012, "获取目标用户设置失败")
+	ErrUserNotAllowEditHabit           = errorx.NewError(10013, "该用户未授权允许编辑其习惯")
+	ErrUserNotAllowShowHabit           = errorx.NewError(10014, "该用户未授权允许查看其习惯")
+	ErrNotAllowParams                  = errorx.NewError(10015, "不支持的信息类型")
+	ErrDateFormatError                 = errorx.NewError(10016, "日期格式错误")
+	ErrCommentContentEmpty             = errorx.NewError(10017, "短语评论不能为空")
+	ErrCommentHasOpinion               = errorx.NewError(10018, "您已经表达过相同的意见")
+	ErrTimeFormatError                 = errorx.NewError(10019, "时间格式错误")
+)

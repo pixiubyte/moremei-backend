@@ -1,0 +1,77 @@
+CREATE TABLE `health_event` (
+    `id` BIGINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT 'Primary Key',
+    `uuid` VARCHAR(64) NOT NULL COMMENT 'UUID',
+    `title` VARCHAR(512) NOT NULL COMMENT '主题(名称)',
+    `theme_color` VARCHAR(64) NOT NULL COMMENT '主题颜色',
+    `content_type` VARCHAR(64) NOT NULL DEFAULT 0 COMMENT '内容类型(clock_in:打卡,remind:提醒,sports:运动,products:产品)',
+    `content` TEXT NOT NULL COMMENT '内容或者内容ID',
+    `start_at` DATETIME NOT NULL COMMENT '开始时间',
+    `end_at` DATETIME COMMENT '结束时间',
+    `repeat_type` TINYINT NOT NULL DEFAULT 0 COMMENT '重复类型(0:不重复,1:每天,2:每周,3:每月,4:每年)',
+    `repeat_days` VARCHAR(1024) NOT NULL COMMENT '重复的天(逗号分隔)',
+    `until` DATE COMMENT '重复结束时间(包含)',
+    `except_dates` VARCHAR(1024) NOT NULL COMMENT '排除的天(逗号分隔)',
+    `extra` JSON COMMENT '额外信息',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态(0:正常,1:删除)',
+    `group_id` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '群组ID,可以不关联',
+    `created_by` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '创建人ID',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+    UNIQUE KEY `uk_uuid` (`uuid`)
+) COMMENT '健康事件';
+
+CREATE TABLE `health_event_member` (
+    `id` BIGINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT 'Primary Key',
+    `event_id` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '事件ID',
+    `user_id` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '用户ID',
+    `created_by` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '创建此关系的用户ID',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY `uk_event_id_user_id` (`event_id`, `user_id`)
+) COMMENT '健康事件用户';
+
+CREATE TABLE `health_event_edit_log` (
+    `id` BIGINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT 'Primary Key',
+    `event_id` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '事件ID',
+    `user_id` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '用户ID',
+    `action` TEXT NOT NULL COMMENT '操作',
+    `before` TEXT NOT NULL COMMENT '修改前内容',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) COMMENT '健康事件编辑日志';
+
+CREATE TABLE `health_event_message_log` (
+    `id` BIGINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT 'Primary Key',
+    `event_id` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '事件ID',
+    `event_date` DATE NOT NULL COMMENT '事件日期',
+    `user_ids` TEXT NOT NULL COMMENT '用户ID列表',
+    `message` TEXT NOT NULL COMMENT '消息',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY `uk_event_id_event_date` (`event_id`, `event_date`)
+) COMMENT '健康事件消息日志';
+
+CREATE TABLE `health_event_combo` (
+    `id` BIGINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT 'Primary Key',
+    `title` VARCHAR(512) NOT NULL COMMENT '标题',
+    `icon` TEXT NOT NULL COMMENT '图标',
+    `events` JSON NOT NULL COMMENT '事件列表',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态(0:正常,1:删除)',
+    `group_id` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '群组ID,可以不关联',
+    `type` VARCHAR(64) NOT NULL COMMENT '类型',
+    `usage_count` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '使用次数',
+    `created_by` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '创建人ID',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) COMMENT '健康事件组合';
+
+CREATE TABLE `health_event_combo_usage` (
+    `id` BIGINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT 'Primary Key',
+    `combo_id` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '组合ID',
+    `event_ids` JSON NOT NULL COMMENT '事件ID列表',
+    `user_id` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '用户ID',
+    `group_id` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '群组ID',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态(0:正常,1:不正常)',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) COMMENT '健康事件组合使用记录';

@@ -1,0 +1,28 @@
+Name: tenant-api
+Host: 0.0.0.0
+Port: 8888
+Mode: dev
+Timeout: 0
+
+Auth:
+  AccessSecret: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX'
+  AccessExpire: 604800
+
+MySQL:
+  DSN: root:qaws@tcp(127.0.0.1:3307)/moremei_new?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai&multiStatements=true
+  DebugSQL: true
+  PrepareStmt: true
+
+Redis:
+  Host: 106.75.224.52:36379
+  Type: node
+  Pass: redis_KNHS3c
+
+Cos:
+  Bucket: ''
+  Region: 'ap-shanghai'
+  AppId: ''
+  SecretID: ''
+  SecretKey: ''
+
+

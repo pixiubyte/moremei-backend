@@ -1,0 +1,135 @@
+syntax = "v1"
+
+@server(
+    jwt: Auth
+    group: user
+    prefix: user
+)
+service tenant-api {
+    @doc(
+        summary: "获取用户信息"
+    )
+    @handler GetUserProfileHandler
+    get /profile returns (UserProfileResponse)
+
+    @handler BindingMobileHandler
+    post /mobile (BindingRequest)
+
+    @doc "完善用户信息"
+    @handler UpdateUserInfoHandler
+    post /info (UpdateUserInfo)
+
+    @doc "获取第三方账户绑定信息"
+    @handler GetThirdPartyBindInfoHandler
+    get /bindings returns (ThirdPartyBindInfoResponse)
+
+    @doc "绑定微信"
+    @handler BindWechatHandler
+    post /binding/wechat (BindWechatRequest)
+
+    @doc "获取用户应用内信息"
+    @handler GetUserAppProfileHandler
+    get /app/:app_name/profile (UserAppProfileRequest) returns (UserAppProfileResponse)
+
+    @doc "设置用户应用内信息"
+    @handler SetUserAppProfileHandler
+    post /app/:app_name/profile (SetUserAppProfileRequest)
+
+    @doc "检查用户角色"
+    @handler CheckUserRoleHandler
+    get /role/check(CheckUserRoleRequest) returns ([]string)
+
+    @doc "设置身高"
+    @handler SetUserHeightHandler
+    post /height (SetUserHeightRequest)
+
+    @doc "获取我的邀请列表"
+    @handler GetMyInviteListHandler
+    get /invites (MyInviteListRequest) returns (MyInviteListResponse)
+}
+
+type (
+    UserProfileResponse {
+        Id string `json:"id"`
+        Nickname string `json:"nickname"`
+        Mobile string `json:"mobile"`
+        Avatar string `json:"avatar"`
+        Gender int `json:"gender"`
+        RegistedTime int64 `json:"registed_time"`
+        IsBoundMobile bool `json:"is_bound_mobile"`
+        IsBoundWechat bool `json:"is_bound_wechat"`
+        BoundWechcat string `json:"bound_wechcat"`
+        Birthday string `json:"birthday"`
+        Address string `json:"address"`
+        Province string `json:"province"` // 省份
+        City string `json:"city"` // 城市
+        Subcompany string `json:"subcompany"` // 子公司
+        Height int64 `json:"height"`
+    }
+
+    BindingRequest {
+        Mobile string `json:"mobile" validate:"mobile"`
+        Code string `json:"code"`
+    }
+
+    UpdateUserInfo {
+        Nickname string `json:"nickname,optional"`
+        Sex int64 `json:"sex,optional,options=[0,1,2]"`
+        Birthday string `json:"birthday,optional"`
+        Address string `json:"address,optional"`
+        Avatar string `json:"avatar,optional"`
+        Province string `json:"province,optional"` // 省份
+        City string `json:"city,optional"` // 城市
+        Subcompany string `json:"subcompany,optional"` // 子公司
+    }
+
+    ThirdPartyBindInfoResponse {
+        Bindings interface{} `json:"bindings"`
+    }
+
+    BindWechatRequest {
+        Code string `json:"code"`
+        App string `json:"app"`
+    }
+
+    UserAppProfileRequest {
+        AppName string `path:"app_name"`
+        ProfileName string `form:"profile_name"`
+    }
+
+    UserAppProfileResponse {
+        ProfileName string `json:"profile_name"`
+        Profile interface{} `json:"profile"`
+    }
+
+    SetUserAppProfileRequest {
+        AppName string `path:"app_name"`
+        ProfileName string `json:"profile_name"`
+        Profile map[string]interface{} `json:"profile"`
+    }
+
+    CheckUserRoleRequest {
+        Roles string `form:"roles"`
+    }
+
+    SetUserHeightRequest {
+        Height uint64 `json:"height,range=[100:250]"`
+    }
+
+    MyInviteListResponse{
+       List []*MyInviteUser `json:"list"`
+    }
+
+    MyInviteUser{
+        Id uint64 `json:"id"`
+        Nickname string `json:"nickname"`
+        Avatar string `json:"avatar"`
+        RegistedTime int64 `json:"registed_time"`
+        Points int64  `json:"points"`
+    }
+
+    MyInviteListRequest{
+        Page int `form:"page,default=1"`
+        PageSize int `form:"page_size,default=20"`
+    }
+)

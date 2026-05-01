@@ -1,0 +1,1 @@
+`gorm:"{{if eq .field "id"}}primaryKey,{{end}}column:{{.field}}"`

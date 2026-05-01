@@ -1,0 +1,8 @@
+CREATE TABLE article_category_relations(
+    id BIGINT(20) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT 'Primary Key',
+    article_id BIGINT(20) UNSIGNED NOT NULL COMMENT '文章ID',
+    category_id BIGINT(20) UNSIGNED NOT NULL COMMENT '分类ID',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY unique_article_category (article_id, category_id)
+) COMMENT '文章分类关系表';

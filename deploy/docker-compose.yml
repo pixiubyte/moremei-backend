@@ -1,0 +1,99 @@
+version: '3'
+
+networks:
+  app:
+    driver: bridge
+
+services:
+  tenant-api:
+    build:
+      context: ../
+      dockerfile: ./cmd/tenant/api/Dockerfile
+      args:
+        - CONFIG_PATH=./deploy/${ENV}
+    image: ${SERVER_NAME}/tenant-api:${IMAGE_VERSION}
+    container_name: ${SERVER_NAME}-tenant-api
+    hostname: ${SERVER_NAME}-tenant-api
+    restart: always
+    volumes:
+      - ${LOG_PATH}:/app/logs
+    ports:
+      - "${TENANT_API_PORT}:8888"
+    env_file:
+      - ".env"
+    networks:
+      - app
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+  tenant-admin-api:
+    build:
+      context: ../
+      dockerfile: ./cmd/tenant/admin-api/Dockerfile
+      args:
+        - CONFIG_PATH=./deploy/${ENV}
+    image: ${SERVER_NAME}/tenant-admin-api:${IMAGE_VERSION}
+    container_name: ${SERVER_NAME}-tenant-admin-api
+    hostname: moremei-ai-saas-tenant-api
+    restart: always
+    volumes:
+      - ${LOG_PATH}:/app/logs
+    ports:
+      - "${TENANT_ADMIN_API_PORT}:8888"
+    env_file:
+      - ".env"
+    networks:
+      - app
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+  tenant-rmq:
+    build:
+      context: ../
+      dockerfile: ./cmd/tenant/rmq/Dockerfile
+      args:
+        - CONFIG_PATH=./deploy/${ENV}
+    image: ${SERVER_NAME}/tenant-rmq:${IMAGE_VERSION}
+    container_name: ${SERVER_NAME}-tenant-rmq
+    hostname: ${SERVER_NAME}-tenant-rmq
+    restart: always
+    volumes:
+      - ${LOG_PATH}:/app/logs
+    ports:
+      - "${XXLJOB_PORT}:${XXLJOB_PORT}"
+    env_file:
+      - ".env"
+    networks:
+      - app
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+  platform-openapi:
+    build:
+      context: ../
+      dockerfile: ./cmd/tenant/api/Dockerfile
+      args:
+        - CONFIG_PATH=./deploy/${ENV}
+    image: ${SERVER_NAME}/platform-openapi:${IMAGE_VERSION}
+    container_name: ${SERVER_NAME}-platform-openapi
+    hostname: ${SERVER_NAME}-platform-openapi
+    restart: always
+    volumes:
+      - ${LOG_PATH}:/app/logs
+    ports:
+      - "${PLATFORM_OPENAPI_PORT}:8888"
+    env_file:
+      - ".env"
+    networks:
+      - app
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G

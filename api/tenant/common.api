@@ -1,0 +1,174 @@
+syntax = "v1"
+
+@server(
+    group: common
+    prefix: common
+)
+service tenant-api {
+    @doc(
+        summary: "获取租户配置"
+    )
+    @handler GetConfigsHandler
+    get /configs returns (GetConfigsResponse)
+
+    @doc "获取指定配置"
+    @handler GetConfigHandler
+    get /config/:config_key (GetConfigRequest) returns (GetConfigResponse)
+
+    @doc(
+        summary: "获取短信签名"
+    )
+    @handler GetSmsSignHandler
+    get /sms/sign (GetSmsSignRequest) returns (GetSmsSignResponse)
+
+    @doc(
+        summary: "发送短信"
+    )
+    @handler SendSmsHandler
+    post /sms/send (SmsSendRequest)
+
+    @doc "获取软件版本信息"
+    @handler GetAppVersionHandler
+    get /version/:app_name (AppVersionRequest) returns (AppVersionResponse)
+
+    @doc(
+        summary: "获取参数"
+    )
+    @handler GetParamsHandler
+    get /params/:param_id (GetParamsRequest) returns (GetParamsResponse)
+
+    @doc"获取小程序链接"
+    @handler GetAppLinkHandler
+    get /app/link (GetAppLinkRequest) returns (GetAppLinkResponse)
+}
+
+@server(
+    jwt: Auth
+    group: common
+    prefix: common
+)
+service tenant-api {
+    @doc(
+        summary: "获取文件上传签名"
+    )
+    @handler FilePutSignHandler
+    post /file/put-sign (FilePutSignRequest) returns (FilePutSignResponse)
+
+    @doc(
+        summary: "保存参数"
+    )
+    @handler SaveParamsHandler
+    post /params/save (SaveParamsRequest) returns (SaveParamsResponse)
+}
+
+type (
+    DefaultAiRobot {
+        Id string `json:"id"`
+        Name string `json:"name"`
+        Description string `json:"description"`
+        ContractImgUrl string `json:"contract_img_url"`
+    }
+    AppConfigs {
+        AppName string `json:"app_name"`
+        AppLogo string `json:"app_logo"`
+        AppTheme string `json:"app_theme"`
+        AppLanguage string `json:"app_language"`
+        AppSideCollapsed string `json:"app_side_collapsed"`
+        AppUserAgreement string `json:"app_user_agreement"`
+        AppPrivacyPolicy string `json:"app_privacy_policy"`
+        AppTechnicalSupport string `json:"app_technical_support"`
+        AppSkinTestEnable string `json:"app_skin_test_enable"`
+    }
+    WecomConfig {
+        WecomCorpId string `json:"wecom_crop_id"`
+    }
+    MemberConfig {
+        MemberBuyUrl string `json:"member_buy_url"`
+    }
+    GetConfigsResponse {
+        App map[string]interface{} `json:"app"`
+        Wecom WecomConfig `json:"wecom"`
+        DefaultAiRobot DefaultAiRobot `json:"default_ai_robot"`
+        MemberConfig MemberConfig `json:"member"`
+    }
+    GetSmsSignRequest {
+        Scene string `form:"scene"`
+    }
+    GetSmsSignResponse {
+        Signure string `json:"signature"`
+    }
+    SmsSendRequest {
+        Method string `json:"method,options=login|bind"`
+        Mobile string `json:"mobile" validate:"mobile"`
+        Scene string `json:"scene,optional"`
+        Ticket string `json:"ticket,optional"`
+        RandStr string `json:"rand_str,optional"`
+    }
+    FilePutSignRequest {
+        Category string `json:"c"`
+        FileExt string `json:"ext"`
+    }
+    FilePutSignResponse {
+        SecurityToken string `json:"security_token"`
+        Authorization string `json:"authorization"`
+        PutUrl string `json:"put_url"`
+        PutHost string `json:"put_host"`
+        PutKey string `json:"put_key"`
+    }
+
+    AppVersionRequest {
+        AppName string `path:"app_name"`
+    }
+
+    AppVersionResponse {
+        Version string `json:"version"`
+        Note string `json:"note"`               // 版本更新说明
+        UpdateAt int64 `json:"update_at"`       // 版本更新时间
+        UpdateUrl string `json:"update_url"`    // 更新地址
+    }
+
+    SaveParamsRequest {
+        Params string `json:"params"` // 要保存的参数内容
+        ExpireAt int64 `json:"expire_at,optional"`        // 过期时间戳，可选
+        Description string `json:"description,optional"`  // 参数描述，可选
+
+    }
+
+    SaveParamsResponse {
+        ParamId uint64 `json:"param_id"`     // 参数ID
+    }
+
+    GetParamsRequest {
+        ParamId uint64 `path:"param_id"` // 参数ID
+    }
+
+    GetParamsResponse {
+        Params string `json:"params"`         // 参数内容
+        ExpireAt int64 `json:"expire_at,omitempty"`     // 过期时间戳
+        CreatedAt int64 `json:"created_at"`   // 创建时间戳
+        Description string `json:"description"` // 参数描述
+    }
+
+    GetConfigRequest {
+        Configkey string `path:"config_key"`
+    }
+
+    GetConfigResponse {
+        Content string `json:"content"`
+    }
+
+    GetAppLinkRequest {
+        AppType string `form:"app_type,default=mini,options=mini|web"` // 程序类型
+        Redirect bool `form:"redirect,default=true,optional"` // 是否直接重定向到程序链接
+        Path string `form:"path,optional"` // 小程序页面路径
+        Query string `form:"query,optional"` // 小程序页面查询参数
+        ExpireType int64 `form:"expire_type,default=1,options=0|1"` // 链接过期类型
+        ExpireTime int64 `form:"expire_time,optional"` // 链接过期时间戳，可选
+        ExpireInterval int64 `form:"expire_interval,default=1,optional"` // 链接过期时间间隔，可选
+        EnvVersion string `form:"env_version,optional,default=release"` // 默认值"release"。要打开的小程序版本。正式版为 "release"，体验版为"trial"，开发版为"develop"，仅在微信外打开时生效。
+    }
+
+    GetAppLinkResponse {
+        AppLink string `json:"app_link"`
+    }
+)

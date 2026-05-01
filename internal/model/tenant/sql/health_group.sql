@@ -1,0 +1,64 @@
+CREATE TABLE `health_group`(
+    `id` BIGINT(20) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT 'Primary Key',
+    `uuid` VARCHAR(64) NOT NULL COMMENT 'UUID',
+    `type` VARCHAR(64) NOT NULL COMMENT '类型(家庭、恋人、朋友等)',
+    `name` VARCHAR(64) NOT NULL COMMENT '名称',
+    `cover` TEXT NOT NULL COMMENT '封面图',
+    `owner_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT '群主ID',
+    `sign` VARCHAR(1024) NOT NULL COMMENT '群说明（签名）',
+    `join_approval` TINYINT NOT NULL DEFAULT 0 COMMENT '是否需要群主审批加入(0:需要,1:不需要)',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态(0:正常,1:禁用,2:删除)',
+    `created_by` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT '创建人ID',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) COMMENT '健康群组';
+
+CREATE Table `health_group_member`(
+    `id` BIGINT(20) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT 'Primary Key',
+    `group_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT '群组ID',
+    `user_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT '群成员ID',
+    `mark` VARCHAR(1024) NOT NULL COMMENT '备注',
+    `user_settings` JSON NOT NULL COMMENT '用户设置',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY `uk_group_id_user_id` (`group_id`, `user_id`)
+) COMMENT '健康群组成员';
+
+CREATE Table `health_group_member_relations`(
+    `id` BIGINT(20) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT 'Primary Key',
+    `group_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT '群组ID',
+    `user_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT '群成员ID',
+    `other_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT '其他群成员ID',
+    `mark` VARCHAR(1024) NOT NULL COMMENT '备注,名称、关系',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY `uk_group_id_user_other_id` (`group_id`, `user_id`, `other_id`)
+) COMMENT '健康群组成员关系';
+
+CREATE TABLE `health_group_member_join_applies`(
+    `id` BIGINT(20) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT 'Primary Key',
+    `group_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT '群组ID',
+    `user_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT '申请人ID',
+    `code` VARCHAR(64) NOT NULL COMMENT '邀请码',
+    `expired_at` DATETIME NOT NULL COMMENT '过期时间',
+    `approval_type` TINYINT NOT NULL DEFAULT 0 COMMENT '审批类型(0:无需审批,1:需要审批)',
+    `approval_by` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT '审批人ID',
+    `mark` VARCHAR(1024) NOT NULL COMMENT '备注',
+    `user_settings` JSON COMMENT '用户预设置',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT '状态(0:待审批,1:已审批,2:已拒绝,3:已过期)',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) COMMENT '健康群组成员加入申请';
+
+CREATE TABLE `health_group_invite_codes`(
+    `id` BIGINT(20) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT COMMENT 'Primary Key',
+    `group_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT '群组ID',
+    `user_id` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0 COMMENT '邀请人ID',
+    `code` VARCHAR(64) NOT NULL COMMENT '邀请码',
+    `expired_at` DATETIME NOT NULL COMMENT '过期时间',
+    `qr_code` TEXT NOT NULL COMMENT '小程序二维码',
+    `background` TEXT NOT NULL COMMENT '背景图',
+    `mark` VARCHAR(1024) NOT NULL COMMENT '备注',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) COMMENT '健康群组邀请码';
